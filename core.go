@@ -9,11 +9,6 @@ import (
 	"strings"
 )
 
-const OAUTH_TOKEN_URL = "/oauth/token"
-const PAY_STATUS_URL = "/pay/paystatus"
-const PAY_REQUEST_URL = "/pay/payrequest"
-const PAY_REFUND_URL = "/pay/payrefund"
-
 // CoreGateway struct
 type CoreGateway struct {
 	Client Client
@@ -25,7 +20,12 @@ func (gateway *CoreGateway) Call(method, path string, header map[string]string, 
 		path = "/" + path
 	}
 
-	path = gateway.Client.JeniusBaseUrl + path
+	if path == gateway.Client.JeniusOauthTokenUrl {
+		path = gateway.Client.JeniusTokenBaseUrl + path
+	} else {
+		path = gateway.Client.JeniusBaseUrl + path
+	}
+
 	return gateway.Client.Call(method, path, header, body, v, x)
 }
 
@@ -40,7 +40,7 @@ func (gateway *CoreGateway) GetToken() (TokenResponse, FailedResponse, error) {
 		"Content-Type": "application/x-www-form-urlencoded",
 	}
 
-	err := gateway.Call("POST", OAUTH_TOKEN_URL, headers, strings.NewReader(data.Encode()), &respSuccess, &respFailed)
+	err := gateway.Call("POST", gateway.Client.JeniusOauthTokenUrl, headers, strings.NewReader(data.Encode()), &respSuccess, &respFailed)
 	if err != nil {
 		gateway.Client.Logger.Println("Error charging: ", err)
 		return respSuccess, respFailed, err
@@ -56,7 +56,7 @@ func (gateway *CoreGateway) PayStatus(req *PayStatusReq) (SuccessResponse, Faile
 	btnpTimestamp := gateway.getBtpnTimestamp()
 	btpnSignature := gateway.generateBtpnSignature(
 		"GET",
-		PAY_STATUS_URL,
+		gateway.Client.JeniusPayStatusUrl,
 		btnpTimestamp,
 		"",
 	)
@@ -74,7 +74,7 @@ func (gateway *CoreGateway) PayStatus(req *PayStatusReq) (SuccessResponse, Faile
 		"Content-Type":                      "application/json",
 	}
 
-	err := gateway.Call("GET", PAY_STATUS_URL, headers, nil, &respSuccess, &respFailed)
+	err := gateway.Call("GET", gateway.Client.JeniusPayStatusUrl, headers, nil, &respSuccess, &respFailed)
 	if err != nil {
 		gateway.Client.Logger.Println("Error charging: ", err)
 		return respSuccess, respFailed, nil
@@ -91,7 +91,7 @@ func (gateway *CoreGateway) PayRequest(req *PayRequestReq, reqBody *PayRequestRe
 	btnpTimestamp := gateway.getBtpnTimestamp()
 	btpnSignature := gateway.generateBtpnSignature(
 		"POST",
-		PAY_REQUEST_URL,
+		gateway.Client.JeniusPayRequestUrl,
 		btnpTimestamp,
 		string(jsonReq),
 	)
@@ -109,7 +109,7 @@ func (gateway *CoreGateway) PayRequest(req *PayRequestReq, reqBody *PayRequestRe
 		"Content-Type":                      "application/json",
 	}
 
-	err := gateway.Call("POST", PAY_REQUEST_URL, headers, bytes.NewBuffer(jsonReq), &respSuccess, &respFailed)
+	err := gateway.Call("POST", gateway.Client.JeniusPayRequestUrl, headers, bytes.NewBuffer(jsonReq), &respSuccess, &respFailed)
 	if err != nil {
 		gateway.Client.Logger.Println("Error charging: ", err)
 		return respSuccess, respFailed, err
@@ -126,7 +126,7 @@ func (gateway *CoreGateway) PayRefund(req *PayRefundReq) (SuccessResponse, Faile
 	btnpTimestamp := gateway.getBtpnTimestamp()
 	btpnSignature := gateway.generateBtpnSignature(
 		"DELETE",
-		fmt.Sprint(PAY_REFUND_URL, "?approval=", req.ApprovalCode),
+		fmt.Sprint(gateway.Client.JeniusPayRefundUrl, "?approval=", req.ApprovalCode),
 		btnpTimestamp,
 		"",
 	)
@@ -145,7 +145,7 @@ func (gateway *CoreGateway) PayRefund(req *PayRefundReq) (SuccessResponse, Faile
 		"Content-Type":                      "application/json",
 	}
 
-	err := gateway.Call("DELETE", fmt.Sprint(PAY_REFUND_URL, "?approval=", req.ApprovalCode), headers, bytes.NewBuffer(jsonReq), &respSuccess, &respFailed)
+	err := gateway.Call("DELETE", fmt.Sprint(gateway.Client.JeniusPayRefundUrl, "?approval=", req.ApprovalCode), headers, bytes.NewBuffer(jsonReq), &respSuccess, &respFailed)
 	if err != nil {
 		gateway.Client.Logger.Println("Error charging: ", err)
 		return respSuccess, respFailed, nil

@@ -1,7 +1,5 @@
 # Jenius Sangu
 
-
-
 ## Usage blueprint
 
 1. There is a type named `Client` (`jenius.Client`) that should be instantiated through `NewClient` which hold any possible setting to the library.
@@ -38,3 +36,6 @@
 
     resp, _, _ := coreGateway.PayRequest(payReq, payReqBody)
 ```
+
+## Credits
+[Midtrans Library for Go(lang)]: https://github.com/veritrans/go-midtrans
