@@ -12,17 +12,17 @@ import (
 
 // Client struct
 type Client struct {
-	JeniusBaseUrl       string
-	JeniusTokenBaseUrl  string
-	JeniusClientId      string
-	JeniusClientSecret  string
-	JeniusApiKey        string
-	JeniusApiSecret     string
-	JeniusXChannelId    string
-	JeniusOauthTokenUrl	string
-	JeniusPayRequestUrl string
+	JeniusBaseUrl        string
+	JeniusTokenBaseUrl   string
+	JeniusClientId       string
+	JeniusClientSecret   string
+	JeniusApiKey         string
+	JeniusApiSecret      string
+	JeniusXChannelId     string
+	JeniusOauthTokenUrl  string
+	JeniusPayRequestUrl  string
 	JeniusPayStatusUrl   string
-	JeniusPayRefundUrl  string
+	JeniusPayRefundUrl   string
 
 	LogLevel int
 	Logger   *log.Logger
