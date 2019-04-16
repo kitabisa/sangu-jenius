@@ -32,6 +32,7 @@
         PromoCode:    "PROMOCODE",
         UrlCallback:  "YOUR-JENIUS-URL-CALLBACK",
         PurchaseDesc: "Description",
+        CreatedAtL 1554588000, //Transaction Time
     }
 
     resp, _, _ := coreGateway.PayRequest(payReq, payReqBody)

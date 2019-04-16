@@ -48,7 +48,7 @@ func (gateway *CoreGateway) GetToken() (TokenResponse, FailedResponse, error) {
 	return respSuccess, respFailed, nil
 }
 
-func (gateway *CoreGateway) PayStatus(req *PayStatusReq) (SuccessResponse, FailedResponse, error) {
+func (gateway *CoreGateway) PayStatus(req *PayStatusReq, timeReq uint) (SuccessResponse, FailedResponse, error) {
 	respSuccess := SuccessResponse{}
 	respFailed := FailedResponse{}
 
@@ -67,7 +67,7 @@ func (gateway *CoreGateway) PayStatus(req *PayStatusReq) (SuccessResponse, Faile
 		"BTPN-Timestamp":                    btnpTimestamp,
 		"X-Channel-Id":                      gateway.Client.JeniusXChannelId,
 		"X-Node":                            "Jenius Pay",
-		"X-Original-Transmission-Date-Time": btnpTimestamp,
+		"X-Original-Transmission-Date-Time": btpnConvertTimestamp(timeReq),
 		"X-Transmission-Date-Time":          btnpTimestamp,
 		"X-Reference-No":                    req.ReferenceNo,
 		"Content-Type":                      "application/json",
@@ -86,7 +86,7 @@ func (gateway *CoreGateway) PayRequest(req *PayRequestReq, reqBody *PayRequestRe
 	respFailed := FailedResponse{}
 	jsonReq, _ := json.Marshal(reqBody)
 
-	btnpTimestamp := gateway.getBtpnTimestamp()
+	btnpTimestamp := btpnConvertTimestamp(reqBody.CreatedAt)
 	btpnSignature := gateway.generateBtpnSignature(
 		"POST",
 		gateway.Client.JeniusPayRequestUrl,
