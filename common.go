@@ -43,3 +43,8 @@ func btpnCleanString(any string) string {
 	s = strings.ReplaceAll(s, "\t", "")
 	return s
 }
+
+func (gateway *CoreGateway) btpnConvertTimestamp(req int64) string {
+	timeReq := time.Unix(req, 0)
+	return timeReq.Format("2006-01-02T15:04:05.000-07:00")
+}

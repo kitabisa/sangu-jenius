@@ -52,11 +52,12 @@ func (gateway *CoreGateway) PayStatus(req *PayStatusReq) (SuccessResponse, Faile
 	respSuccess := SuccessResponse{}
 	respFailed := FailedResponse{}
 
-	btnpTimestamp := gateway.getBtpnTimestamp()
+	btpnTimestamp := gateway.getBtpnTimestamp()
+	btpnOriginalTimestamp := gateway.btpnConvertTimestamp(req.TransactionTime)
 	btpnSignature := gateway.generateBtpnSignature(
 		"GET",
 		gateway.Client.JeniusPayStatusUrl,
-		btnpTimestamp,
+		btpnTimestamp,
 		"",
 	)
 
@@ -64,11 +65,11 @@ func (gateway *CoreGateway) PayStatus(req *PayStatusReq) (SuccessResponse, Faile
 		"Authorization":                     fmt.Sprintf("Bearer %v", req.Token),
 		"BTPN-Signature":                    btpnSignature,
 		"BTPN-ApiKey":                       gateway.Client.JeniusApiKey,
-		"BTPN-Timestamp":                    btnpTimestamp,
+		"BTPN-Timestamp":                    btpnTimestamp,
 		"X-Channel-Id":                      gateway.Client.JeniusXChannelId,
 		"X-Node":                            "Jenius Pay",
-		"X-Original-Transmission-Date-Time": btnpTimestamp,
-		"X-Transmission-Date-Time":          btnpTimestamp,
+		"X-Original-Transmission-Date-Time": btpnOriginalTimestamp,
+		"X-Transmission-Date-Time":          btpnTimestamp,
 		"X-Reference-No":                    req.ReferenceNo,
 		"Content-Type":                      "application/json",
 	}
@@ -86,11 +87,12 @@ func (gateway *CoreGateway) PayRequest(req *PayRequestReq, reqBody *PayRequestRe
 	respFailed := FailedResponse{}
 	jsonReq, _ := json.Marshal(reqBody)
 
-	btnpTimestamp := gateway.getBtpnTimestamp()
+	btpnTimestamp := gateway.getBtpnTimestamp()
+	btpnOriginalTimestamp := gateway.btpnConvertTimestamp(reqBody.CreatedAt)
 	btpnSignature := gateway.generateBtpnSignature(
 		"POST",
 		gateway.Client.JeniusPayRequestUrl,
-		btnpTimestamp,
+		btpnTimestamp,
 		string(jsonReq),
 	)
 
@@ -98,11 +100,11 @@ func (gateway *CoreGateway) PayRequest(req *PayRequestReq, reqBody *PayRequestRe
 		"Authorization":                     fmt.Sprintf("Bearer %v", req.Token),
 		"BTPN-Signature":                    btpnSignature,
 		"BTPN-ApiKey":                       gateway.Client.JeniusApiKey,
-		"BTPN-Timestamp":                    btnpTimestamp,
+		"BTPN-Timestamp":                    btpnTimestamp,
 		"X-Channel-Id":                      gateway.Client.JeniusXChannelId,
 		"X-Node":                            "Jenius Pay",
-		"X-Original-Transmission-Date-Time": btnpTimestamp,
-		"X-Transmission-Date-Time":          btnpTimestamp,
+		"X-Original-Transmission-Date-Time": btpnOriginalTimestamp,
+		"X-Transmission-Date-Time":          btpnTimestamp,
 		"X-Reference-No":                    req.ReferenceNo,
 		"Content-Type":                      "application/json",
 	}
@@ -120,11 +122,12 @@ func (gateway *CoreGateway) PayRefund(req *PayRefundReq) (SuccessResponse, Faile
 	respFailed := FailedResponse{}
 	jsonReq, _ := json.Marshal(req)
 
-	btnpTimestamp := gateway.getBtpnTimestamp()
+	btpnTimestamp := gateway.getBtpnTimestamp()
+	btpnOriginalTimestamp := gateway.btpnConvertTimestamp(req.TransactionTime)
 	btpnSignature := gateway.generateBtpnSignature(
 		"DELETE",
 		fmt.Sprint(gateway.Client.JeniusPayRefundUrl, "?approval=", req.ApprovalCode),
-		btnpTimestamp,
+		btpnTimestamp,
 		"",
 	)
 
@@ -132,11 +135,11 @@ func (gateway *CoreGateway) PayRefund(req *PayRefundReq) (SuccessResponse, Faile
 		"Authorization":                     fmt.Sprintf("Bearer %v", req.Token),
 		"BTPN-Signature":                    btpnSignature,
 		"BTPN-ApiKey":                       gateway.Client.JeniusApiKey,
-		"BTPN-Timestamp":                    btnpTimestamp,
+		"BTPN-Timestamp":                    btpnTimestamp,
 		"X-Channel-Id":                      gateway.Client.JeniusXChannelId,
 		"X-Node":                            "Jenius Pay",
-		"X-Original-Transmission-Date-Time": btnpTimestamp,
-		"X-Transmission-Date-Time":          btnpTimestamp,
+		"X-Original-Transmission-Date-Time": btpnOriginalTimestamp,
+		"X-Transmission-Date-Time":          btpnTimestamp,
 		"X-Reference-No":                    req.ReferenceNo,
 		"X-Amount":                          req.Amount,
 		"Content-Type":                      "application/json",
