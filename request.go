@@ -6,8 +6,8 @@ type GetTokenReq struct {
 }
 
 type PayRequestReq struct {
-	ReferenceNo	string
-	Token string
+	ReferenceNo string
+	Token       string
 }
 
 type PayRequestReqBody struct {
@@ -16,17 +16,19 @@ type PayRequestReqBody struct {
 	PromoCode    string `json:"promo_code"`
 	UrlCallback  string `json:"url_callback"`
 	PurchaseDesc string `json:"purchase_desc"`
-	CreatedAt	 int64	`json:"created_at"`
+	CreatedAt    int64  `json:"created_at"`
 }
 
 type PayStatusReq struct {
-	ReferenceNo	string
-	Token string
+	ReferenceNo     string
+	Token           string
+	TransactionTime int64
 }
 
 type PayRefundReq struct {
-	ReferenceNo	string
-	Amount string
-	Token string
-	ApprovalCode string
+	ReferenceNo     string
+	Amount          string
+	Token           string
+	ApprovalCode    string
+	TransactionTime int64
 }

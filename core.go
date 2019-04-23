@@ -48,12 +48,12 @@ func (gateway *CoreGateway) GetToken() (TokenResponse, FailedResponse, error) {
 	return respSuccess, respFailed, nil
 }
 
-func (gateway *CoreGateway) PayStatus(req *PayStatusReq, timeReq int64) (SuccessResponse, FailedResponse, error) {
+func (gateway *CoreGateway) PayStatus(req *PayStatusReq) (SuccessResponse, FailedResponse, error) {
 	respSuccess := SuccessResponse{}
 	respFailed := FailedResponse{}
 
 	btpnTimestamp := gateway.getBtpnTimestamp()
-	btpnOriginalTimestamp := gateway.btpnConvertTimestamp(timeReq)
+	btpnOriginalTimestamp := gateway.btpnConvertTimestamp(req.TransactionTime)
 	btpnSignature := gateway.generateBtpnSignature(
 		"GET",
 		gateway.Client.JeniusPayStatusUrl,
@@ -117,13 +117,13 @@ func (gateway *CoreGateway) PayRequest(req *PayRequestReq, reqBody *PayRequestRe
 	return respSuccess, respFailed, nil
 }
 
-func (gateway *CoreGateway) PayRefund(req *PayRefundReq, timeReq int64) (SuccessResponse, FailedResponse, error) {
+func (gateway *CoreGateway) PayRefund(req *PayRefundReq) (SuccessResponse, FailedResponse, error) {
 	respSuccess := SuccessResponse{}
 	respFailed := FailedResponse{}
 	jsonReq, _ := json.Marshal(req)
 
 	btpnTimestamp := gateway.getBtpnTimestamp()
-	btpnOriginalTimestamp := gateway.btpnConvertTimestamp(timeReq)
+	btpnOriginalTimestamp := gateway.btpnConvertTimestamp(req.TransactionTime)
 	btpnSignature := gateway.generateBtpnSignature(
 		"DELETE",
 		fmt.Sprint(gateway.Client.JeniusPayRefundUrl, "?approval=", req.ApprovalCode),
