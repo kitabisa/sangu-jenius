@@ -16,7 +16,7 @@ type PayRequestReqBody struct {
 	PromoCode    string `json:"promo_code"`
 	UrlCallback  string `json:"url_callback"`
 	PurchaseDesc string `json:"purchase_desc"`
-	CreatedAt	 uint	`json:"created_at"`
+	CreatedAt	 int64	`json:"created_at"`
 }
 
 type PayStatusReq struct {

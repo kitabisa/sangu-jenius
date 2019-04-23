@@ -44,7 +44,7 @@ func btpnCleanString(any string) string {
 	return s
 }
 
-func btpnConvertTimestamp(req uint) string {
-	timeReq := time.Unix(int64(req), 0)
+func (gateway *CoreGateway) btpnConvertTimestamp(req int64) string {
+	timeReq := time.Unix(req, 0)
 	return timeReq.Format("2006-01-02T15:04:05.000-07:00")
 }

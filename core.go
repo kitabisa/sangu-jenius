@@ -48,15 +48,16 @@ func (gateway *CoreGateway) GetToken() (TokenResponse, FailedResponse, error) {
 	return respSuccess, respFailed, nil
 }
 
-func (gateway *CoreGateway) PayStatus(req *PayStatusReq, timeReq uint) (SuccessResponse, FailedResponse, error) {
+func (gateway *CoreGateway) PayStatus(req *PayStatusReq, timeReq int64) (SuccessResponse, FailedResponse, error) {
 	respSuccess := SuccessResponse{}
 	respFailed := FailedResponse{}
 
-	btnpTimestamp := gateway.getBtpnTimestamp()
+	btpnTimestamp := gateway.getBtpnTimestamp()
+	btpnOriginalTimestamp := gateway.btpnConvertTimestamp(timeReq)
 	btpnSignature := gateway.generateBtpnSignature(
 		"GET",
 		gateway.Client.JeniusPayStatusUrl,
-		btnpTimestamp,
+		btpnTimestamp,
 		"",
 	)
 
@@ -64,11 +65,11 @@ func (gateway *CoreGateway) PayStatus(req *PayStatusReq, timeReq uint) (SuccessR
 		"Authorization":                     fmt.Sprintf("Bearer %v", req.Token),
 		"BTPN-Signature":                    btpnSignature,
 		"BTPN-ApiKey":                       gateway.Client.JeniusApiKey,
-		"BTPN-Timestamp":                    btnpTimestamp,
+		"BTPN-Timestamp":                    btpnTimestamp,
 		"X-Channel-Id":                      gateway.Client.JeniusXChannelId,
 		"X-Node":                            "Jenius Pay",
-		"X-Original-Transmission-Date-Time": btpnConvertTimestamp(timeReq),
-		"X-Transmission-Date-Time":          btnpTimestamp,
+		"X-Original-Transmission-Date-Time": btpnOriginalTimestamp,
+		"X-Transmission-Date-Time":          btpnTimestamp,
 		"X-Reference-No":                    req.ReferenceNo,
 		"Content-Type":                      "application/json",
 	}
@@ -86,11 +87,12 @@ func (gateway *CoreGateway) PayRequest(req *PayRequestReq, reqBody *PayRequestRe
 	respFailed := FailedResponse{}
 	jsonReq, _ := json.Marshal(reqBody)
 
-	btnpTimestamp := btpnConvertTimestamp(reqBody.CreatedAt)
+	btpnTimestamp := gateway.getBtpnTimestamp()
+	btpnOriginalTimestamp := gateway.btpnConvertTimestamp(reqBody.CreatedAt)
 	btpnSignature := gateway.generateBtpnSignature(
 		"POST",
 		gateway.Client.JeniusPayRequestUrl,
-		btnpTimestamp,
+		btpnTimestamp,
 		string(jsonReq),
 	)
 
@@ -98,11 +100,11 @@ func (gateway *CoreGateway) PayRequest(req *PayRequestReq, reqBody *PayRequestRe
 		"Authorization":                     fmt.Sprintf("Bearer %v", req.Token),
 		"BTPN-Signature":                    btpnSignature,
 		"BTPN-ApiKey":                       gateway.Client.JeniusApiKey,
-		"BTPN-Timestamp":                    btnpTimestamp,
+		"BTPN-Timestamp":                    btpnTimestamp,
 		"X-Channel-Id":                      gateway.Client.JeniusXChannelId,
 		"X-Node":                            "Jenius Pay",
-		"X-Original-Transmission-Date-Time": btnpTimestamp,
-		"X-Transmission-Date-Time":          btnpTimestamp,
+		"X-Original-Transmission-Date-Time": btpnOriginalTimestamp,
+		"X-Transmission-Date-Time":          btpnTimestamp,
 		"X-Reference-No":                    req.ReferenceNo,
 		"Content-Type":                      "application/json",
 	}
@@ -115,16 +117,17 @@ func (gateway *CoreGateway) PayRequest(req *PayRequestReq, reqBody *PayRequestRe
 	return respSuccess, respFailed, nil
 }
 
-func (gateway *CoreGateway) PayRefund(req *PayRefundReq) (SuccessResponse, FailedResponse, error) {
+func (gateway *CoreGateway) PayRefund(req *PayRefundReq, timeReq int64) (SuccessResponse, FailedResponse, error) {
 	respSuccess := SuccessResponse{}
 	respFailed := FailedResponse{}
 	jsonReq, _ := json.Marshal(req)
 
-	btnpTimestamp := gateway.getBtpnTimestamp()
+	btpnTimestamp := gateway.getBtpnTimestamp()
+	btpnOriginalTimestamp := gateway.btpnConvertTimestamp(timeReq)
 	btpnSignature := gateway.generateBtpnSignature(
 		"DELETE",
 		fmt.Sprint(gateway.Client.JeniusPayRefundUrl, "?approval=", req.ApprovalCode),
-		btnpTimestamp,
+		btpnTimestamp,
 		"",
 	)
 
@@ -132,11 +135,11 @@ func (gateway *CoreGateway) PayRefund(req *PayRefundReq) (SuccessResponse, Faile
 		"Authorization":                     fmt.Sprintf("Bearer %v", req.Token),
 		"BTPN-Signature":                    btpnSignature,
 		"BTPN-ApiKey":                       gateway.Client.JeniusApiKey,
-		"BTPN-Timestamp":                    btnpTimestamp,
+		"BTPN-Timestamp":                    btpnTimestamp,
 		"X-Channel-Id":                      gateway.Client.JeniusXChannelId,
 		"X-Node":                            "Jenius Pay",
-		"X-Original-Transmission-Date-Time": btnpTimestamp,
-		"X-Transmission-Date-Time":          btnpTimestamp,
+		"X-Original-Transmission-Date-Time": btpnOriginalTimestamp,
+		"X-Transmission-Date-Time":          btpnTimestamp,
 		"X-Reference-No":                    req.ReferenceNo,
 		"X-Amount":                          req.Amount,
 		"Content-Type":                      "application/json",
