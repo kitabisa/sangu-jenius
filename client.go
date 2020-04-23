@@ -12,17 +12,17 @@ import (
 
 // Client struct
 type Client struct {
-	JeniusBaseUrl        string
-	JeniusTokenBaseUrl   string
-	JeniusClientId       string
-	JeniusClientSecret   string
-	JeniusApiKey         string
-	JeniusApiSecret      string
-	JeniusXChannelId     string
-	JeniusOauthTokenUrl  string
-	JeniusPayRequestUrl  string
-	JeniusPayStatusUrl   string
-	JeniusPayRefundUrl   string
+	JeniusBaseUrl       string
+	JeniusTokenBaseUrl  string
+	JeniusClientId      string
+	JeniusClientSecret  string
+	JeniusApiKey        string
+	JeniusApiSecret     string
+	JeniusXChannelId    string
+	JeniusOauthTokenUrl string
+	JeniusPayRequestUrl string
+	JeniusPayStatusUrl  string
+	JeniusPayRefundUrl  string
 
 	LogLevel int
 	Logger   *log.Logger
@@ -84,7 +84,7 @@ func (c *Client) ExecuteRequest(req *http.Request, v interface{}, x interface{})
 	res, err := httpClient.Do(req)
 	if err != nil {
 		if logLevel > 0 {
-			logger.Println("Cannot send request: ", err)
+			logger.Println("Request failed: ", err)
 		}
 		return err
 	}
@@ -92,13 +92,6 @@ func (c *Client) ExecuteRequest(req *http.Request, v interface{}, x interface{})
 
 	if logLevel > 2 {
 		logger.Println("Completed in ", time.Since(start))
-	}
-
-	if err != nil {
-		if logLevel > 0 {
-			logger.Println("Request failed: ", err)
-		}
-		return err
 	}
 
 	resBody, err := ioutil.ReadAll(res.Body)

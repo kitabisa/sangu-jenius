@@ -76,7 +76,7 @@ func (gateway *CoreGateway) PayStatus(req *PayStatusReq) (SuccessResponse, Faile
 
 	err := gateway.Call("GET", gateway.Client.JeniusPayStatusUrl, headers, nil, &respSuccess, &respFailed)
 	if err != nil {
-		return respSuccess, respFailed, nil
+		return respSuccess, respFailed, err
 	}
 
 	return respSuccess, respFailed, nil
@@ -147,7 +147,7 @@ func (gateway *CoreGateway) PayRefund(req *PayRefundReq) (SuccessResponse, Faile
 
 	err := gateway.Call("DELETE", fmt.Sprint(gateway.Client.JeniusPayRefundUrl, "?approval=", req.ApprovalCode), headers, bytes.NewBuffer(jsonReq), &respSuccess, &respFailed)
 	if err != nil {
-		return respSuccess, respFailed, nil
+		return respSuccess, respFailed, err
 	}
 
 	return respSuccess, respFailed, nil
