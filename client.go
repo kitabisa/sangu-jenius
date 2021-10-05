@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"moul.io/http2curl"
 )
 
 // Client struct
@@ -72,53 +74,44 @@ func (c *Client) NewRequest(method string, fullPath string, headers map[string]s
 }
 
 // ExecuteRequest : execute request
-func (c *Client) ExecuteRequest(req *http.Request, v interface{}, x interface{}) error {
-	logLevel := c.LogLevel
+func (c *Client) ExecuteRequest(req *http.Request, v interface{}, x interface{}) (err error) {
 	logger := c.Logger
 
-	if logLevel > 1 {
-		logger.Println("Request ", req.Method, ": ", req.URL.Host, req.URL.Path)
-	}
-
+	command, _ := http2curl.GetCurlCommand(req)
 	start := time.Now()
+	logger.Println("Start requesting: ", req.RequestURI)
 	res, err := httpClient.Do(req)
 	if err != nil {
-		if logLevel > 0 {
-			logger.Println("Request failed: ", err)
-		}
+		logger.Println("Request failed. Error : %v , Curl Request : %v", err, command)
 		return err
 	}
 	defer res.Body.Close()
-
-	if logLevel > 2 {
-		logger.Println("Completed in ", time.Since(start))
-	}
+	logger.Println("Completed in ", time.Since(start))
+	logger.Println("Curl Request: ", command)
 
 	resBody, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		if logLevel > 0 {
-			logger.Println("Cannot read response body: ", err)
-		}
+		logger.Println("Cannot read response body: ", err)
 		return err
 	}
 
-	if logLevel > 2 {
-		logger.Println("Jenius response: ", resBody)
-	}
+	logger.Println("Jenius response: ", resBody, " status code : ", res.StatusCode)
 
 	if v != nil && res.StatusCode == 200 {
 		if err = json.Unmarshal(resBody, v); err != nil {
+			logger.Println("Jenius status code 200 unmarshall error: ", resBody)
 			return err
 		}
 	}
 
 	if x != nil && res.StatusCode != 200 {
 		if err = json.Unmarshal(resBody, x); err != nil {
+			logger.Println("Jenius status code not 200 unmarshall error: ", resBody)
 			return err
 		}
 	}
 
-	return nil
+	return err
 }
 
 // Call the Jenius API at specific `path` using the specified HTTP `method`. The result will be
