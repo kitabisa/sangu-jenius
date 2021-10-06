@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
-	"os"
 	"time"
+
+	"moul.io/http2curl"
 )
 
 // Client struct
@@ -25,11 +25,20 @@ type Client struct {
 	JeniusPayRefundUrl  string
 
 	LogLevel int
-	Logger   *log.Logger
+	Logger   Logger
 }
+
 
 // NewClient : this function will always be called when the library is in use
 func NewClient() Client {
+	logOption := LogOption{
+		Format:          "text",
+		Level:           "info",
+		TimestampFormat: "2006-01-02T15:04:05-0700",
+		CallerToggle:    false,
+	}
+
+	logger := *NewLogger(logOption)
 	return Client{
 		// LogLevel is the logging level used by the Jenius library
 		// 0: No logging
@@ -37,7 +46,7 @@ func NewClient() Client {
 		// 2: Errors + informational (default)
 		// 3: Errors + informational + debug
 		LogLevel: 2,
-		Logger:   log.New(os.Stderr, "", log.LstdFlags),
+		Logger:     logger,
 	}
 }
 
@@ -47,14 +56,9 @@ var httpClient = &http.Client{Timeout: defHTTPTimeout}
 
 // NewRequest : send new request
 func (c *Client) NewRequest(method string, fullPath string, headers map[string]string, body io.Reader) (*http.Request, error) {
-	logLevel := c.LogLevel
-	logger := c.Logger
-
 	req, err := http.NewRequest(method, fullPath, body)
 	if err != nil {
-		if logLevel > 0 {
-			logger.Println("Request creation failed: ", err)
-		}
+		c.Logger.Info("Request creation failed: %v ", err)
 		return nil, err
 	}
 
@@ -72,53 +76,43 @@ func (c *Client) NewRequest(method string, fullPath string, headers map[string]s
 }
 
 // ExecuteRequest : execute request
-func (c *Client) ExecuteRequest(req *http.Request, v interface{}, x interface{}) error {
-	logLevel := c.LogLevel
-	logger := c.Logger
-
-	if logLevel > 1 {
-		logger.Println("Request ", req.Method, ": ", req.URL.Host, req.URL.Path)
-	}
-
+func (c *Client) ExecuteRequest(req *http.Request, v interface{}, x interface{}) (err error) {
+	command, _ := http2curl.GetCurlCommand(req)
 	start := time.Now()
+	c.Logger.Info("Start requesting: %v ", req.URL)
 	res, err := httpClient.Do(req)
 	if err != nil {
-		if logLevel > 0 {
-			logger.Println("Request failed: ", err)
-		}
-		return err
+		c.Logger.Error("Request failed. Error : %v , Curl Request : %v", err, command)
+		return
 	}
 	defer res.Body.Close()
-
-	if logLevel > 2 {
-		logger.Println("Completed in ", time.Since(start))
-	}
+	c.Logger.Info("Completed in %v", time.Since(start))
+	c.Logger.Info("Curl Request: %v ", command)
 
 	resBody, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		if logLevel > 0 {
-			logger.Println("Cannot read response body: ", err)
-		}
-		return err
+		c.Logger.Info("Cannot read response body: %v ", err)
+		return
 	}
 
-	if logLevel > 2 {
-		logger.Println("Jenius response: ", resBody)
-	}
+	c.Logger.Info("Jenius HTTP status response : %d", res.StatusCode)
+	c.Logger.Info("Jenius response body : %s", string(resBody))
 
 	if v != nil && res.StatusCode == 200 {
 		if err = json.Unmarshal(resBody, v); err != nil {
-			return err
+			c.Logger.Info("Jenius status code 200 unmarshall error: %v ", resBody)
+			return
 		}
 	}
 
 	if x != nil && res.StatusCode != 200 {
 		if err = json.Unmarshal(resBody, x); err != nil {
-			return err
+			c.Logger.Info("Jenius status code not 200 unmarshall error: %v ", resBody)
+			return
 		}
 	}
 
-	return nil
+	return
 }
 
 // Call the Jenius API at specific `path` using the specified HTTP `method`. The result will be
