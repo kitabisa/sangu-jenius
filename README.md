@@ -1,5 +1,8 @@
 # Jenius Sangu
 
+## DEPRECATED AS OF 12/12/2022
+Moved to https://github.com/kitabisa/sangu-client
+
 ## Usage blueprint
 
 1. There is a type named `Client` (`jenius.Client`) that should be instantiated through `NewClient` which hold any possible setting to the library.
